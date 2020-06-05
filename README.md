@@ -17,6 +17,7 @@ Move the create.bat file to C:\WINDOWS\system32
 Create a secrets.py file like this:
 
 username='your_username'
+
 password='your_password'
 
 Finally, type <create {name_repo}> on the Command Prompt(with vscode and python added to your PATH variables)
