@@ -14,4 +14,5 @@ If "%1"=="" (
     python create.py %fn% %flag%
 )
 
+code .
 exit

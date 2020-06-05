@@ -44,7 +44,6 @@ def create_repo():
         print('Git repository created and synced successfully!')
     elif str(sys.argv[2]) == 'l':
         print('Git repository created successfully!')
-    os.system('code .')
 
 if __name__ == "__main__":
     create_repo()
