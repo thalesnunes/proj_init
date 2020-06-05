@@ -3,6 +3,11 @@ import os
 from github import Github
 
 def create_repo():
+    '''
+    Creates a Github repo and syncs with the local one, if sys.argv[2] is "".
+    For a private repo, use: <create name_repo private>
+    For only a local repo, use: <create name_repo l>
+    '''
 
     repo_name = str(sys.argv[1])
     flag = str(sys.argv[2])
