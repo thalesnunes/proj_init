@@ -12,6 +12,9 @@ def create_repo():
     repo_name = str(sys.argv[1])
     flag = str(sys.argv[2])
     path = os.environ.get('mp')
+    if os.path.isdir(f'{path}/{repo_name}'):
+        print('A repo with this name already exists! Please, try another name.')
+        return sys.exit(1)
     git_token = os.environ.get('git')
     login = ''
 
@@ -44,6 +47,8 @@ def create_repo():
         print('Git repository created and synced successfully!')
     elif str(sys.argv[2]) == 'l':
         print('Git repository created successfully!')
+    os.system('code .')
+    sys.exit(0)
 
 if __name__ == "__main__":
     create_repo()

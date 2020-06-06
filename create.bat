@@ -8,11 +8,13 @@ if "%2"=="" (
 )
 cd /d %~dp0
 
-If "%1"=="" (
-    echo "error"
+if "%1"=="" (
+    echo "Error! To use the create function type: create <repo_name> <l, private>"
 ) else (
     python create.py %fn% %flag%
 )
-
-code .
-exit
+if %errorlevel%==0 (
+    exit
+) else (
+    cd C:\Users\thale
+)
