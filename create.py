@@ -30,6 +30,7 @@ def create_repo():
     commands = ['git init',
                 f'git remote add origin https://github.com/{login}/{repo_name}.git',
                 'cd.> README.md',
+                'cd.> .gitignore',
                 'git add .',
                 'git commit -m "Initial commit"',
                 'git push -u origin master']
