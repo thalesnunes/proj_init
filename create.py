@@ -35,7 +35,7 @@ def create_repo():
                 'git commit -m "Initial commit"',
                 'git push -u origin master']
 
-    if str(sys.argv[2]) == 'l':
+    if flag == 'l':
         commands.pop(1)
         commands.pop()
     
@@ -44,9 +44,9 @@ def create_repo():
 
     for com in commands:
         os.system(com)
-    if str(sys.argv[2]) == '':
+    if flag == '':
         print('Git repository created and synced successfully!')
-    elif str(sys.argv[2]) == 'l':
+    elif flag == 'l':
         print('Git repository created successfully!')
     os.system('code .')
     sys.exit(0)
