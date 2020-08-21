@@ -1,4 +1,4 @@
-**Project Initializer**
+#Project Initializer
 
 Everytime you want to start a project you do the basics. go to your projects folder, create a new folder for the project, do your git commands, sync the repo, add a README file and push your initial commit.
 
@@ -6,20 +6,17 @@ That is what this simple project is for, making your life easier, and doing all 
 
 P.S.: This is only for Windows
 
-The only things you have to do:
+Setting up:
 
-In the create.bat file, change the first line with the path of the directory that you want to start your new project
+1. Create two Environment Variables:
 
-Change the username from Github
+    - First named `git` with the value being a Github Personal Access Token
+    - Second named `mp` with the value being the path to where you want your automatic projects to be created
 
-Move the create.bat file to C:\WINDOWS\system32
+2. Add this repo's directory path to your systems PATH variable
 
-Create a secrets.py file like this:
+3. Finally, type `create {repo_name}` on your CMD or PowerShell terminal
 
-username='your_username'
+Optional: You can also use the flags `-p or --private` to start the repo as private or `-l or --local` to create it locally
 
-password='your_password'
-
-Finally, type <create {name_repo}> on the Command Prompt(with vscode and python added to your PATH variables)
-
-It should work!!!
+Happy Coding!

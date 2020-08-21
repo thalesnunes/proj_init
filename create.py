@@ -5,8 +5,8 @@ from github import Github
 def create_repo():
     '''
     Creates a Github repo and syncs with the local one, if sys.argv[2] is "".
-    For a private repo, use: <create name_repo private>
-    For only a local repo, use: <create name_repo l>
+    For a private repo, use: <create name_repo --private> or <create name_repo -p>
+    For only a local repo, use: <create name_repo --local> or <create name_repo -l>
     '''
 
     repo_name = str(sys.argv[1])
@@ -18,7 +18,7 @@ def create_repo():
     git_token = os.environ.get('git')
     login = ''
 
-    if flag == '' or flag == 'private':
+    if flag == '' or flag == '--private' or flag == '-p':
         github = Github(git_token)
         user = github.get_user()
         login = user.login
@@ -35,7 +35,7 @@ def create_repo():
                 'git commit -m "Initial commit"',
                 'git push -u origin master']
 
-    if flag == 'l':
+    if flag == '-l' or flag == '--local':
         commands.pop(1)
         commands.pop()
     
