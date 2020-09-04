@@ -49,7 +49,7 @@ def create_repo():
     elif flag == 'l':
         print('Git repository created successfully!')
     os.system('code .')
-    sys.exit(0)
+    sys.exit()
 
 if __name__ == "__main__":
     create_repo()
