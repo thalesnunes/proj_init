@@ -22,7 +22,7 @@ def create_repo():
     git_token = os.environ.get('git')
     login = ''
     repo_name_git = "-".join(repo_name.split())
-    if flag == '' or flag == '--private' or flag == '-p':
+    if flag == '' or flag == 'private' or flag == '-p':
         github = Github(git_token)
         user = github.get_user()
         login = user.login
@@ -40,7 +40,7 @@ def create_repo():
                 'git branch -M master',
                 'git push -u origin master']
 
-    if flag == '-l' or flag == '--local':
+    if flag == '-l' or flag == 'local':
         commands.pop(1)
         commands.pop()
         commands.pop()
@@ -50,7 +50,7 @@ def create_repo():
 
     for com in commands:
         os.system(com)
-    if flag == '' or flag == '--private' or flag == '-p':
+    if flag == '' or flag == 'private' or flag == '-p':
         print('Git repository created and synced successfully!')
     else:
         print('Git repository created successfully!')
