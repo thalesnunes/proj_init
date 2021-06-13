@@ -1,62 +1,125 @@
-import sys
+import argparse
 import os
-from github import Github
+import sys
 from time import sleep
+from typing import Any
 
-def create_repo():
+from github import Github
+
+
+def init_parser() -> argparse.ArgumentParser:
+    '''Initializes the command line parser.add()
+
+    Returns:
+        argparse.ArgumentParser: Command line parser with added arguments
     '''
-    Creates a Github repo and syncs with the local one, if sys.argv[2] is "".
-    For a private repo, use: <create name_repo --private> or <create name_repo -p>
-    For only a local repo, use: <create name_repo --local> or <create name_repo -l>
+    parser = argparse.ArgumentParser(prog='create',
+                                     description='Automate your workflow with create command.')
+    parser.add_argument('-l', '--local', dest='local',
+                        action='store_true',
+                        help='Creates your repo only locally.')
+    parser.add_argument('-p', '--private', dest='private',
+                        action='store_true',
+                        help='Creates your repo in private mode.')
+    parser.add_argument('repo_name', metavar='<repo_name>',
+                        help='Name of your repo to be created.')
+    return parser
+
+def validate(args: Any, path: str):
+    '''Validates the input.
+
+    Args:
+        args (Any): Args from the command line.
+        path (str): Path where the repo will be created.
+
+    Raises:
+        NameError: Duplicated repos.
     '''
-    if not 1 < len(sys.argv) < 4:
-        print('Error! To use the create function type: create <repo_name> <l, private>')
-        sys.exit(1)
+    if args.local == args.private == True:
+        raise Exception("LOCAL and PRIVATE can't be used at same time.")
 
-    repo_name = str(sys.argv[1])
-    flag = str(sys.argv[2]) if len(sys.argv) == 3 else ''
-    path = os.environ.get('mp')
-    if os.path.isdir(f'{path}/{repo_name}'):
-        print('A repo with this name already exists! Please, try another name.')
-        return sys.exit(1)
-    git_token = os.environ.get('git')
-    login = ''
-    repo_name_git = "-".join(repo_name.split())
-    if flag == '' or flag == 'private' or flag == '-p':
-        github = Github(git_token)
-        user = github.get_user()
-        login = user.login
-        if flag == '':
-            user.create_repo(repo_name_git)
-        else:
-            user.create_repo(repo_name_git, private=True)
+    if os.path.isdir(f'{path}/{args.repo_name}'):
+        raise NameError('A repo with this name already exists! Please, try another name.')
 
-    commands = ['git init',
-                f'git remote add origin https://github.com/{login}/{repo_name_git}.git',
-                'cd.> README.md',
-                'cd.> .gitignore',
-                'git add .',
-                'git commit -m "Initial commit"',
-                'git branch -M master',
-                'git push -u origin master']
+def create_github_repo(github_token: str, repo_name: str, private: bool = False) -> str:
+    '''Creates Github repo.
 
-    if flag == '-l' or flag == 'local':
-        commands.pop(1)
-        commands.pop()
-        commands.pop()
-    
+    Args:
+        github_token (str): Token to access Github.
+        repo_name (str): Name of the Github repo.
+        private (bool, optional): Private or not. Defaults to False.
+
+    Returns:
+        str: Returns the github repo link.
+    '''
+    repo_name_git = repo_name.replace(' ', '-')
+    github = Github(github_token)
+    user = github.get_user()
+    login = user.login
+    user.create_repo(repo_name_git, private=private)
+
+    return f'https://github.com/{login}/{repo_name_git}.git'
+
+
+def run_commands(commands: list):
+    '''Runs the commands on shell.
+
+    Args:
+        commands (list): List of commands.add()
+    '''
+    for com in commands:
+        os.system(com)
+
+def create_local_repo(repo_name: str, path: str):
+    '''Creates a local repo.
+
+    Args:
+        repo_name (str): Name of the repo to be created.
+        github_token (str): Token to access Github.
+        local (bool, optional): If the repo should be created only locally. Defaults to False.
+        private (bool, optional): If the repo should be created on private mode. Defaults to False.
+    '''
     os.mkdir(f'{path}/{repo_name}')
     os.chdir(f'{path}/{repo_name}')
 
-    for com in commands:
-        os.system(com)
-    if flag == '' or flag == 'private' or flag == '-p':
+    os_type = {'posix': ['touch README.md', 'touch .gitignore'],
+               'nt': ['cd.> README.md', 'cd.> .gitignore']}
+
+    commands = os_type[os.name] + ['git init',
+                                   'git add .',
+                                   'git commit -m "Initial commit"']
+
+    run_commands(commands)
+
+def sync_repos(repo_link: str):
+
+    sync_commands = [f'git remote add origin {repo_link}',
+                     'git branch -M main',
+                     'git push -u origin main']
+
+    run_commands(sync_commands)
+
+def run():
+
+    parser = init_parser()
+    args = parser.parse_args()
+
+    path = os.environ.get('PROJECTS')
+    validate(args, path)
+    github_token = os.environ.get('GIT_AUTOMATION')
+
+    if not args.local:
+        repo_link = create_github_repo(github_token, args.repo_name, args.private)
+
+    create_local_repo(args.repo_name, path)
+
+    if not args.local:
+        sync_repos(repo_link)
         print('Git repository created and synced successfully!')
     else:
         print('Git repository created successfully!')
+
     os.system('code .')
-    sleep(1)
-    os.system('exit')
 
 if __name__ == "__main__":
-    create_repo()
+    run()
