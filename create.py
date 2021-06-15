@@ -33,10 +33,11 @@ def validate(args: Any, path: str):
         path (str): Path where the repo will be created.
 
     Raises:
+        AssertionError: LOCAL and PRIVATE can't be used at same time.
         NameError: Duplicated repos.
     '''
     if args.local == args.private == True:
-        raise Exception("LOCAL and PRIVATE can't be used at same time.")
+        raise AssertionError("LOCAL and PRIVATE can't be used at same time.")
 
     if os.path.isdir(f'{path}/{args.repo_name}'):
         raise NameError('A repo with this name already exists! Please, try another name.')
