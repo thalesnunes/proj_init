@@ -6,25 +6,39 @@ from github import Github
 
 
 def init_parser() -> argparse.ArgumentParser:
-    '''Initializes the command line parser.add()
+    """Initializes the command line parser.add()
 
     Returns:
         argparse.ArgumentParser: Command line parser with added arguments
-    '''
-    parser = argparse.ArgumentParser(prog='create',
-                                     description='Automate your workflow with create command.')
-    parser.add_argument('-l', '--local', dest='local',
-                        action='store_true',
-                        help='Creates your repo only locally.')
-    parser.add_argument('-p', '--private', dest='private',
-                        action='store_true',
-                        help='Creates your repo in private mode.')
-    parser.add_argument('repo_name', metavar='<repo_name>',
-                        help='Name of your repo to be created.')
+    """
+    parser = argparse.ArgumentParser(
+        prog="create",
+        description="Automate your workflow with create command."
+    )
+    parser.add_argument(
+        "-l",
+        "--local",
+        dest="local",
+        action="store_true",
+        help="Creates your repo only locally.",
+    )
+    parser.add_argument(
+        "-p",
+        "--private",
+        dest="private",
+        action="store_true",
+        help="Creates your repo in private mode.",
+    )
+    parser.add_argument(
+        "repo_name",
+        metavar="<repo_name>",
+        help="Name of your repo to be created."
+    )
     return parser
 
+
 def validate(args: Any, path: str):
-    '''Validates the input.
+    """Validates the input.
 
     Args:
         args (Any): Args from the command line.
@@ -33,15 +47,22 @@ def validate(args: Any, path: str):
     Raises:
         AssertionError: LOCAL and PRIVATE can't be used at same time.
         NameError: Duplicated repos.
-    '''
-    if args.local == args.private == True:
+    """
+    if args.local == args.private is True:
         raise AssertionError("LOCAL and PRIVATE can't be used at same time.")
 
-    if os.path.isdir(f'{path}/{args.repo_name}'):
-        raise NameError('A repo with this name already exists! Please, try another name.')
+    if os.path.isdir(f"{path}/{args.repo_name}"):
+        raise NameError(
+            "A repo with this name already exists! Please, try another name."
+        )
 
-def create_github_repo(github_token: str, repo_name: str, private: bool = False) -> str:
-    '''Creates Github repo.
+
+def create_github_repo(
+        github_token: str,
+        repo_name: str,
+        private: bool = False
+) -> str:
+    """Creates Github repo.
 
     Args:
         github_token (str): Token to access Github.
@@ -50,62 +71,76 @@ def create_github_repo(github_token: str, repo_name: str, private: bool = False)
 
     Returns:
         str: Returns the github repo link.
-    '''
-    repo_name_git = repo_name.replace(' ', '-')
+    """
+    repo_name_git = repo_name.replace(" ", "-")
     github = Github(github_token)
     user = github.get_user()
     login = user.login
     user.create_repo(repo_name_git, private=private)
 
-    return f'https://github.com/{login}/{repo_name_git}.git'
+    return f"https://github.com/{login}/{repo_name_git}.git"
 
 
 def run_commands(commands: list):
-    '''Runs the commands on shell.
+    """Runs the commands on shell.
 
     Args:
         commands (list): List of commands.add()
-    '''
+    """
     for com in commands:
         os.system(com)
 
+
 def create_local_repo(repo_name: str, path: str):
-    '''Creates a local repo.
+    """Create a local repo.
 
     Args:
-        repo_name (str): Name of the repo to be created.
-        github_token (str): Token to access Github.
-        local (bool, optional): If the repo should be created only locally. Defaults to False.
-        private (bool, optional): If the repo should be created on private mode. Defaults to False.
-    '''
-    os.mkdir(f'{path}/{repo_name}')
-    os.chdir(f'{path}/{repo_name}')
+        repo_name (str): Name of repo to be created
+        path (str): Path of the repo
+    """
+    os.mkdir(f"{path}/{repo_name}")
+    os.chdir(f"{path}/{repo_name}")
 
-    os_type = {'posix': ['touch README.md', 'touch .gitignore'],
-               'nt': ['cd.> README.md', 'cd.> .gitignore']}
+    os_type = {
+        "posix": ["touch README.md", "touch .gitignore"],
+        "nt": ["cd.> README.md", "cd.> .gitignore"],
+    }
 
-    commands = os_type[os.name] + ['git init',
-                                   'git add .',
-                                   'git commit -m "Initial commit"']
+    commands = os_type[os.name] + [
+        "git init",
+        "git add .",
+        'git commit -m "Initial commit"',
+    ]
 
     run_commands(commands)
 
-def sync_repos(repo_link: str):
 
-    sync_commands = [f'git remote add origin {repo_link}',
-                     'git branch -M main',
-                     'git push -u origin main']
+def sync_repos(repo_link: str):
+    """Syncs the repo with remote.
+
+    Args:
+        repo_link (str): Link of remote repo
+    """
+
+    sync_commands = [
+        f"git remote add origin {repo_link}",
+        "git branch -M main",
+        "git push -u origin main",
+    ]
 
     run_commands(sync_commands)
 
+
 def run():
+    """Run cli tool.
+    """
 
     parser = init_parser()
     args = parser.parse_args()
 
-    path = os.environ.get('PROJECTS')
+    path = os.environ.get("PROJECTS")
     validate(args, path)
-    github_token = os.environ.get('GIT_AUTOMATION')
+    github_token = os.environ.get("GIT_AUTOMATION")
 
     if not args.local:
         repo_link = create_github_repo(github_token, args.repo_name, args.private)
@@ -114,11 +149,12 @@ def run():
 
     if not args.local:
         sync_repos(repo_link)
-        print('Git repository created and synced successfully!')
+        print("Git repository created and synced successfully!")
     else:
-        print('Git repository created successfully!')
+        print("Git repository created successfully!")
 
-    os.system('code .')
+    os.system(f"{os.environ.get('EDITOR')} .")
+
 
 if __name__ == "__main__":
     run()
