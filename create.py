@@ -74,9 +74,11 @@ def create_github_repo(
     """
     repo_name_git = repo_name.replace(" ", "-")
     github = Github(github_token)
+    print("Github authenticated successfully.")
     user = github.get_user()
     login = user.login
     user.create_repo(repo_name_git, private=private)
+    print("Github repo created successfully.")
 
     return f"https://github.com/{login}/{repo_name_git}.git"
 
@@ -98,8 +100,10 @@ def create_local_repo(repo_name: str, path: str):
         repo_name (str): Name of repo to be created
         path (str): Path of the repo
     """
-    os.mkdir(f"{path}/{repo_name}")
-    os.chdir(f"{path}/{repo_name}")
+    print(f'Creating "{repo_name}" in "{path}"')
+
+    os.mkdir(path/repo_name)
+    os.chdir(path/repo_name)
 
     os_type = {
         "posix": ["touch README.md", "touch .gitignore"],
@@ -138,18 +142,20 @@ def run():
     parser = init_parser()
     args = parser.parse_args()
 
-    path = os.environ.get("PROJECTS")
-    validate(args, path)
-    github_token = os.environ.get("GIT_AUTOMATION")
+    args.path = Path(args.path or os.environ.get("PROJECTS") or os.getcwd())
+
+    validate(args)
 
     if not args.local:
-        repo_link = create_github_repo(github_token, args.repo_name, args.private)
+        github_token = os.environ.get("GIT_AUTOMATION")
+        repo_link = create_github_repo(github_token, args.repo_name, args.private)  # noqa
 
     create_local_repo(args.repo_name, path)
 
     if not args.local:
         sync_repos(repo_link)
         print("Git repository created and synced successfully!")
+        print(repo_link)
     else:
         print("Git repository created successfully!")
 
