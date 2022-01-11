@@ -175,5 +175,11 @@ class ProjectInitializer:
                     os.system(com)
 
 
-if __name__ == "__main__":
+def proj_init():
+    """Starts the tool.
+    """
     ProjectInitializer().run()
+
+
+if __name__ == "__main__":
+    proj_init()
