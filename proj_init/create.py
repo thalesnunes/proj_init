@@ -1,172 +1,179 @@
-import argparse
+#!/usr/bin/env python
+
+from argparse import ArgumentParser, Namespace
 import os
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import List, Optional, Union
 
 from github import Github
 
 
-def init_parser() -> argparse.ArgumentParser:
-    """Initializes the command line parser.add()
-
-    Returns:
-        argparse.ArgumentParser: Command line parser with added arguments
+class ProjectInitializer:
+    """ProjectInitializer.
     """
-    parser = argparse.ArgumentParser(
-        prog="create",
-        description="Automate your workflow with create command."
-    )
-    parser.add_argument(
-        "-l",
-        "--local",
-        dest="local",
-        action="store_true",
-        help="Creates your repo only locally.",
-    )
-    parser.add_argument(
-        "-p",
-        "--private",
-        dest="private",
-        action="store_true",
-        help="Creates your repo in private mode.",
-    )
-    parser.add_argument(
-        "-d",
-        "--directory",
-        dest="path",
-        action="store",
-        help="Path where the repo is going to be created.",
-    )
-    parser.add_argument(
-        "repo_name",
-        metavar="<repo_name>",
-        help="Name of your repo to be created."
-    )
-    return parser
 
+    parser: ArgumentParser
+    args: Namespace
+    github_token: str
+    repo_name: str
 
-def validate(args: Any):
-    """Validates the input.
+    def __init__(self):
+        """Initializes the cli parser, reads args and validates them.
+        """
+        self.init_parser()
 
-    Args:
-        args (Any): Args from the command line.
+        self.args = self.parser.parse_args()
+        self.args.path = Path(
+                self.args.path or os.environ.get("PROJECTS") or os.getcwd()
+                )
 
-    Raises:
-        AssertionError: LOCAL and PRIVATE can't be used at same time.
-        NameError: Duplicated repos.
-    """
-    if args.local == args.private is True:
-        raise AssertionError("LOCAL and PRIVATE can't be used at same time.")
+        self.validate()
 
-    if (args.path/args.repo_name).is_dir():
-        raise NameError(
-            "A directory with this name already exists! Please, try another name."  # noqa
+    def init_parser(self):
+        """Initializes the command line tool
+        """
+        self.parser = ArgumentParser(
+            prog="proj_init",
+            description="Automate your workflow with proj_init command."
+        )
+        self.parser.add_argument(
+            "-l",
+            "--local",
+            dest="local",
+            action="store_true",
+            help="Creates your repo only locally.",
+        )
+        self.parser.add_argument(
+            "-p",
+            "--private",
+            dest="private",
+            action="store_true",
+            help="Creates your repo in private mode.",
+        )
+        self.parser.add_argument(
+            "-d",
+            "--directory",
+            dest="path",
+            action="store",
+            help="Path where the repo is going to be created.",
+        )
+        self.parser.add_argument(
+            "repo_name",
+            metavar="<repo_name>",
+            help="Name of your repo to be created."
         )
 
+    def validate(self):
+        """Validates the input.
 
-def create_github_repo(
-        github_token: str,
-        repo_name: str,
-        private: Optional[bool] = False
-) -> str:
-    """Creates Github repo.
+        Raises:
+            AssertionError: LOCAL and PRIVATE can't be used at same time.
+            NameError: Duplicated repos.
+        """
+        if self.args.local == self.args.private is True:
+            raise AssertionError(
+                    "LOCAL and PRIVATE can't be used at same time."
+                    )
 
-    Args:
-        github_token (str): Token to access Github.
-        repo_name (str): Name of the Github repo.
-        private (Optional[bool]): Private or not. Defaults to False.
+        if (self.args.path/self.args.repo_name).is_dir():
+            raise NameError(
+                "A directory with this name already exists! Please, try another name."  # noqa
+            )
 
-    Returns:
-        str: Returns the github repo link.
-    """
-    repo_name_git = repo_name.replace(" ", "-")
-    github = Github(github_token)
-    print("Github authenticated successfully.")
-    user = github.get_user()
-    login = user.login
-    user.create_repo(repo_name_git, private=private)
-    print("Github repo created successfully.")
+    def create_github_repo(
+            self, repo_name: str, private: Optional[bool] = False
+            ):
+        """Creates Github repo, public or private.
 
-    return f"https://github.com/{login}/{repo_name_git}.git"
+        Args:
+            repo_name (str): Name of the Github repo.
+            private (Optional[bool]): Private or not. Defaults to False.
+        """
+        repo_name_git = repo_name.replace(" ", "-")
 
+        self.github_client = Github(self.github_token)
+        print("Github authenticated successfully.")
 
-def run_commands(commands: List[str]):
-    """Runs the commands on shell.
+        user = self.github_client.get_user()
+        user.create_repo(repo_name_git, private=private)
+        print("Github repo created successfully.")
 
-    Args:
-        commands (List[str]): List of commands.add()
-    """
-    for com in commands:
-        os.system(com)
+        self.repo_link = f"https://github.com/{user.login}/{repo_name_git}.git"
 
+    def create_local_repo(self, repo_name: str, path: Path):
+        """Create a local repo.
 
-def create_local_repo(repo_name: str, path: Path):
-    """Create a local repo.
+        Args:
+            repo_name (str): Name of repo to be created
+            path (Path): Path of the repo
+        """
+        print(f'Creating "{repo_name}" in "{path.absolute()}"')
+        os.mkdir(path/repo_name)
+        os.chdir(path/repo_name)
 
-    Args:
-        repo_name (str): Name of repo to be created
-        path (Path): Path of the repo
-    """
-    print(f'Creating "{repo_name}" in "{path}"')
-    os.mkdir(path/repo_name)
-    os.chdir(path/repo_name)
+        os_type = {
+            "posix": ["touch README.md", "touch .gitignore"],
+            "nt": ["cd.> README.md", "cd.> .gitignore"],
+        }
 
-    os_type = {
-        "posix": ["touch README.md", "touch .gitignore"],
-        "nt": ["cd.> README.md", "cd.> .gitignore"],
-    }
+        commands = os_type[os.name] + [
+            "git init",
+            "git add .",
+            'git commit -m "Initial commit"',
+        ]
 
-    commands = os_type[os.name] + [
-        "git init",
-        "git add .",
-        'git commit -m "Initial commit"',
-    ]
+        self.run_commands(commands)
 
-    run_commands(commands)
+    def sync_repos(self):
+        """Syncs the repo with remote.
+        """
 
+        sync_commands = [
+            f"git remote add origin {self.repo_link}",
+            "git branch -M main",
+            "git push -u origin main",
+        ]
 
-def sync_repos(repo_link: str):
-    """Syncs the repo with remote.
+        self.run_commands(sync_commands)
 
-    Args:
-        repo_link (str): Link of remote repo
-    """
+    def open_editor(self):
+        """Open the editor of choice.
+        """
 
-    sync_commands = [
-        f"git remote add origin {repo_link}",
-        "git branch -M main",
-        "git push -u origin main",
-    ]
+        self.run_commands(f"{os.environ.get('EDITOR')} .")
 
-    run_commands(sync_commands)
+    def run(self):
+        """Run cli tool.
+        """
+        if not self.args.local:
+            self.github_token = os.environ.get("GIT_AUTOMATION")
+            self.repo_link = self.create_github_repo(
+                    self.args.repo_name, self.args.private
+                    )
 
+        self.create_local_repo(self.args.repo_name, self.args.path)
 
-def run():
-    """Run cli tool.
-    """
+        if not self.args.local:
+            self.sync_repos(self.repo_link)
+            print("Git repository created and synced successfully!")
+            print(self.repo_link)
+        else:
+            print("Git repository created successfully!")
 
-    parser = init_parser()
-    args = parser.parse_args()
+    @staticmethod
+    def run_commands(*commands: Union[List[str], str]):
+        """Runs the commands on shell.
 
-    args.path = Path(args.path or os.environ.get("PROJECTS") or os.getcwd())
-
-    validate(args)
-
-    if not args.local:
-        github_token = os.environ.get("GIT_AUTOMATION")
-        repo_link = create_github_repo(github_token, args.repo_name, args.private)  # noqa
-
-    create_local_repo(args.repo_name, args.path)
-
-    if not args.local:
-        sync_repos(repo_link)
-        print("Git repository created and synced successfully!")
-        print(repo_link)
-    else:
-        print("Git repository created successfully!")
-
-    os.system(f"{os.environ.get('EDITOR')} .")
+        Args:
+            *commands (Union[List[str], str]): Commands or list of commands.
+        """
+        for command in commands:
+            if isinstance(command, str):
+                os.system(command)
+            elif isinstance(command, list):
+                for com in command:
+                    os.system(com)
 
 
 if __name__ == "__main__":
-    run()
+    ProjectInitializer().run()
