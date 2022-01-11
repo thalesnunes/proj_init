@@ -34,8 +34,7 @@ def init_parser() -> argparse.ArgumentParser:
         "-d",
         "--directory",
         dest="path",
-        action="store_const",
-        const=os.environ.get("PROJECTS") or os.getcwd(),
+        action="store",
         help="Path where the repo is going to be created.",
     )
     parser.add_argument(
@@ -146,7 +145,8 @@ def run():
     parser = init_parser()
     args = parser.parse_args()
 
-    args.path = Path(args.path)
+    args.path = Path(args.path or os.environ.get("PROJECTS") or os.getcwd())
+
     validate(args)
     github_token = os.environ.get("GIT_AUTOMATION")
 
