@@ -4,15 +4,33 @@ Everytime you want to start a project you do the basics. go to your projects fol
 
 That is what this simple project is for, making your life easier, and doing all that automatically for you.
 
-Setting up:
+## Setting up:
 
-1. Create two Environment Variables:
+1. Install the project.
+```bash
+$ pip install proj-init
+```
 
-    - First named `GIT_AUTOMATION` with the value being a Github Personal Access Token
-    - Second named `PROJECTS` with the value being the path to where you want your automatic projects to be created
+2. Create environment variables:
 
-2. Install the requirements.
+    - `GIT_AUTOMATION = Github Personal Access Token`
+    - `PROJECTS = Default path where to create the projects` (Optional, if you don't set this variable the default path will be the current directory)
 
-3. Usability: `python3 create [-h] [-l] [-p] <repo_name>`.
+3. Usage:
+```
+proj_init [-h] [-l] [-p] [-d PATH] <repo_name>
+
+Automate your workflow with proj_init command.
+
+positional arguments:
+  <repo_name>           Name of your repo to be created.
+
+options:
+  -h, --help            show this help message and exit
+  -l, --local           Creates your repo only locally.
+  -p, --private         Creates your repo in private mode.
+  -d PATH, --directory PATH
+                        Path where the repo is going to be created.
+```
 
 Happy Coding!
