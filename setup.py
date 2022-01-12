@@ -15,7 +15,7 @@ with open(ROOT_DIR / "requirements.txt", "r") as requirements_file:
 setup(
     name="proj_init",
     description="Automate your workflow with proj_init command.",
-    version="1.0.0",
+    version="1.0.1",
     packages=find_packages(),
     install_requires=all_reqs,
     python_requires=">=3.6",
