@@ -154,7 +154,7 @@ class ProjectInitializer:
         self.create_local_repo(self.args.repo_name, self.args.path)
 
         if not self.args.local:
-            self.sync_repos(self.repo_link)
+            self.sync_repos()
             print("Git repository created and synced successfully!")
             print(self.repo_link)
         else:
