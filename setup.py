@@ -14,11 +14,11 @@ with open(ROOT_DIR / "requirements.txt", "r") as requirements_file:
 
 setup(
     name="proj_init",
-    description="Automate your workflow with proj_init command.",
-    version="1.0.2",
+    description="Initialize you github projects with a one liner",
+    version="1.0.3",
     packages=find_packages(),
     install_requires=all_reqs,
-    python_requires=">=3.6",
+    python_requires=">=3.6.2",
     entry_points={
         "console_scripts": ["proj_init=proj_init.create:proj_init"]
     },

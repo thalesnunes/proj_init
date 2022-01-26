@@ -17,7 +17,7 @@ class ProjectInitializer:
     github_token: str
     repo_name: str
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes the cli parser, reads args and validates them.
         """
         self.init_parser()
@@ -29,7 +29,7 @@ class ProjectInitializer:
 
         self.validate()
 
-    def init_parser(self):
+    def init_parser(self) -> None:
         """Initializes the command line tool
         """
         self.parser = ArgumentParser(
@@ -63,7 +63,7 @@ class ProjectInitializer:
             help="Name of your repo to be created."
         )
 
-    def validate(self):
+    def validate(self) -> None:
         """Validates the input.
 
         Raises:
@@ -82,7 +82,7 @@ class ProjectInitializer:
 
     def create_github_repo(
             self, repo_name: str, private: Optional[bool] = False
-            ):
+            ) -> None:
         """Creates Github repo, public or private.
 
         Args:
@@ -100,7 +100,7 @@ class ProjectInitializer:
 
         self.repo_link = f"https://github.com/{user.login}/{repo_name_git}.git"
 
-    def create_local_repo(self, repo_name: str, path: Path):
+    def create_local_repo(self, repo_name: str, path: Path) -> None:
         """Create a local repo.
 
         Args:
@@ -124,7 +124,7 @@ class ProjectInitializer:
 
         self.run_commands(commands)
 
-    def sync_repos(self):
+    def sync_repos(self) -> None:
         """Syncs the repo with remote.
         """
 
@@ -136,13 +136,13 @@ class ProjectInitializer:
 
         self.run_commands(sync_commands)
 
-    def open_editor(self):
+    def open_editor(self) -> None:
         """Open the editor of choice.
         """
 
         self.run_commands(f"{os.environ.get('EDITOR')} .")
 
-    def run(self):
+    def run(self) -> None:
         """Run cli tool.
         """
         if not self.args.local:
@@ -159,7 +159,7 @@ class ProjectInitializer:
             print("Git repository created successfully!")
 
     @staticmethod
-    def run_commands(*commands: Union[List[str], str]):
+    def run_commands(*commands: Union[List[str], str]) -> None:
         """Runs the commands on shell.
 
         Args:
@@ -173,7 +173,7 @@ class ProjectInitializer:
                     os.system(com)
 
 
-def proj_init():
+def proj_init() -> None:
     """Starts the tool.
     """
     ProjectInitializer().run()
