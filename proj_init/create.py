@@ -157,7 +157,8 @@ class ProjectInitializer:
         if not self.args.local:
             self.github_token = os.environ.get("GIT_AUTOMATION")
             self.create_github_repo(self.args.repo_name, self.args.private)
-            self.run_commands(self.git_commands)
+            if not (self.create_path/".git").is_dir():
+                self.run_commands(self.git_commands)
 
             self.sync_repos()
 
