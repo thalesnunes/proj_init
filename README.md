@@ -18,7 +18,7 @@ $ pip install proj-init
 
 3. Usage:
 ```
-proj_init [-h] [-l] [-p] [-d PATH] <repo_name>
+proj_init [-h] [-l] [-r] [-p] [-d PATH] <repo_name>
 
 Automate your workflow with proj_init command.
 
@@ -28,6 +28,7 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   -l, --local           Creates your repo only locally.
+  -r, --remote          Creates your repo only remotelly.
   -p, --private         Creates your repo in private mode.
   -d PATH, --directory PATH
                         Path where the repo is going to be created.
