@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "proj_init"
-version = "1.0.3"
+version = "1.0.4"
 description = "Initialize you github projects with a one liner"
 authors = ["Thales Nunes <thalesaknunes22@gmail.com>"]
 license = "MIT"
