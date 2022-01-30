@@ -53,7 +53,7 @@ class ProjectInitializer:
             "--remote",
             dest="remote",
             action="store_true",
-            help="Creates your repo only remotelly.",
+            help="Creates your repo only remotely.",
         )
         self.parser.add_argument(
             "-p",
