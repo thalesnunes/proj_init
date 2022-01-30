@@ -19,9 +19,7 @@ setup(
     packages=find_packages(),
     install_requires=all_reqs,
     python_requires=">=3.6.2",
-    entry_points={
-        "console_scripts": ["proj_init=proj_init.create:proj_init"]
-    },
+    entry_points={"console_scripts": ["proj_init=proj_init.create:proj_init"]},
     author="Thales Nunes",
     keyword="git, github, project, automation",
     long_description=long_description,
