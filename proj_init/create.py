@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from argparse import ArgumentParser, Namespace
 import os
+from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import List, Optional, Union
 
@@ -9,32 +9,37 @@ from github import Github
 
 
 class ProjectInitializer:
-    """ProjectInitializer.
-    """
+    """ProjectInitializer."""
 
     parser: ArgumentParser
     args: Namespace
     github_token: str
     repo_name: str
+    create_path: Path
+    git_commands: List[str]
 
     def __init__(self) -> None:
-        """Initializes the cli parser, reads args and validates them.
-        """
+        """Initializes the cli parser, reads args and validates them."""
         self.init_parser()
 
         self.args = self.parser.parse_args()
         self.args.path = Path(
-                self.args.path or os.environ.get("PROJECTS") or os.getcwd()
-                )
+            self.args.path or os.environ.get("PROJECTS") or os.getcwd()
+        )
+        self.create_path = self.args.path / self.args.repo_name
 
         self.validate()
+        self.git_commands = [
+            "git init",
+            "git add .",
+            'git commit -m "Initial commit"',
+        ]
 
     def init_parser(self) -> None:
-        """Initializes the command line tool
-        """
+        """Initializes the command line tool"""
         self.parser = ArgumentParser(
             prog="proj_init",
-            description="Automate your workflow with proj_init command."
+            description="Automate your workflow with proj_init command.",
         )
         self.parser.add_argument(
             "-l",
@@ -42,6 +47,13 @@ class ProjectInitializer:
             dest="local",
             action="store_true",
             help="Creates your repo only locally.",
+        )
+        self.parser.add_argument(
+            "-r",
+            "--remote",
+            dest="remote",
+            action="store_true",
+            help="Creates your repo only remotelly.",
         )
         self.parser.add_argument(
             "-p",
@@ -60,7 +72,7 @@ class ProjectInitializer:
         self.parser.add_argument(
             "repo_name",
             metavar="<repo_name>",
-            help="Name of your repo to be created."
+            help="Name of your repo to be created.",
         )
 
     def validate(self) -> None:
@@ -72,17 +84,17 @@ class ProjectInitializer:
         """
         if self.args.local == self.args.private is True:
             raise AssertionError(
-                    "LOCAL and PRIVATE can't be used at same time."
-                    )
+                "LOCAL and PRIVATE can't be used at same time."
+            )
 
-        if (self.args.path/self.args.repo_name).is_dir():
+        if self.create_path.is_dir() and not self.args.remote:
             raise NameError(
                 "A directory with this name already exists! Please, try another name."  # noqa
             )
 
     def create_github_repo(
-            self, repo_name: str, private: Optional[bool] = False
-            ) -> None:
+        self, repo_name: str, private: Optional[bool] = False
+    ) -> None:
         """Creates Github repo, public or private.
 
         Args:
@@ -108,25 +120,17 @@ class ProjectInitializer:
             path (Path): Path of the repo
         """
         print(f'Creating "{repo_name}" in "{path.absolute()}"')
-        os.mkdir(path/repo_name)
-        os.chdir(path/repo_name)
 
         os_type = {
             "posix": ["touch README.md", "touch .gitignore"],
             "nt": ["cd.> README.md", "cd.> .gitignore"],
         }
 
-        commands = os_type[os.name] + [
-            "git init",
-            "git add .",
-            'git commit -m "Initial commit"',
-        ]
-
+        commands = os_type[os.name] + self.git_commands
         self.run_commands(commands)
 
     def sync_repos(self) -> None:
-        """Syncs the repo with remote.
-        """
+        """Syncs the repo with remote."""
 
         sync_commands = [
             f"git remote add origin {self.repo_link}",
@@ -137,24 +141,29 @@ class ProjectInitializer:
         self.run_commands(sync_commands)
 
     def open_editor(self) -> None:
-        """Open the editor of choice.
-        """
+        """Open the editor of choice."""
 
         self.run_commands(f"{os.environ.get('EDITOR')} .")
 
     def run(self) -> None:
-        """Run cli tool.
-        """
+        """Run cli tool."""
+
+        self.create_path.mkdir(exist_ok=True)
+        os.chdir(self.create_path)
+
+        if not self.args.remote:
+            self.create_local_repo(self.args.repo_name, self.args.path)
+
         if not self.args.local:
             self.github_token = os.environ.get("GIT_AUTOMATION")
             self.create_github_repo(self.args.repo_name, self.args.private)
+            self.run_commands(self.git_commands)
 
-        self.create_local_repo(self.args.repo_name, self.args.path)
-
-        if not self.args.local:
             self.sync_repos()
+
             print("Git repository created and synced successfully!")
             print(self.repo_link)
+
         else:
             print("Git repository created successfully!")
 
@@ -174,8 +183,7 @@ class ProjectInitializer:
 
 
 def proj_init() -> None:
-    """Starts the tool.
-    """
+    """Starts the tool."""
     ProjectInitializer().run()
 
 
